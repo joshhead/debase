@@ -5,8 +5,8 @@ debase file.zip > file.zip.html
 
 file.zip.html:
 <pre>
-<!DOCTYPE html>
-<script type="text/javascript">
+&lt;!DOCTYPE html&gt;
+&lt;script type="text/javascript"&gt;
 location.href="data:application/zip;base64,"+
 "UEsDBBQAAAAIABJydD/7dxYusAAAALIAAAAKABwA"+
 "c3F1YXJlLmdpZlVUCQADE1LJThhSyU51eAsAAQTo"+
@@ -21,7 +21,7 @@ location.href="data:application/zip;base64,"+
 "VVQFAAMTUslOdXgLAAEE6AMAAAToAwAAUEsFBgAA"+
 "AAABAAEAUAAAAPQAAAAAAA=="+
 "";
-</script>
+&lt;/script&gt;
 </pre>
 
 Open file.zip.html in a modern web browser, and when prompted, save the download as file.zip to restore.
