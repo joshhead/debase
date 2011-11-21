@@ -1,0 +1,79 @@
+#!/usr/bin/env perl
+use warnings;
+use strict;
+use MIME::Base64 qw(encode_base64);
+use Getopt::Std;
+$Getopt::Std::STANDARD_HELP_VERSION = "true";
+$main::VERSION = "0.1";
+
+sub HELP_MESSAGE {
+  my $fh = shift || \*STDERR;
+  print $fh "Usage: debase input.file\n";
+}
+
+# I plan to extend this later so that it will
+# transparently use File::MimeInfo or the mimetype command
+# depending on what is available
+sub getMimeType {
+  my $filename = shift;
+  return undef if ($filename eq "");
+  my $mimetype = `mimetype -b $filename`;
+  chomp $mimetype;
+  return undef if ($mimetype eq "");
+  return $mimetype;
+}
+
+sub runTests {
+  print "Running unit tests.\n";
+  getMimeType("/usr/bin/env") eq 'application/x-executable' || die ("/usr/bin/env should have type application/x-executable\n");
+  !defined getMimeType("") || die ("Empty filename should have failed\n");
+  !defined getMimeType("/home/unlikelyusername/nosuchfile") || die ("Non-existant file should have failed.\n");
+  print "All tests passed.\n";
+}
+
+sub getMimeChunker {
+  my $filename = shift;
+  my $chunkSize = shift || 30;
+  my $buf;
+  open(my $fh, "<", $filename) or return undef;
+  return sub {
+    if (read($fh, $buf, $chunkSize)) {
+      my $section = encode_base64($buf);
+      chomp $section;
+      return $section;
+    } else {
+      close($fh);
+      return undef;
+    }
+  }
+}
+
+# Chunker should be a code reference that returns strings when called
+# until there are no more chunks, then returns a false value
+sub printFile {
+  my $mimeType = shift;
+  my $chunker = shift;
+  print qq(<!DOCTYPE html>\n);
+  print qq(<script type="text/javascript">\n);
+  print qq(location.href="data:$mimeType;base64,"+\n);
+  while (my $chunk = $chunker->()) {
+    print qq("$chunk"+\n);
+  }
+  print qq("";\n);
+  print qq(</script>\n);
+}
+
+my %opts;
+getopts('t', \%opts);
+if (exists $opts{t}) {
+  runTests();
+  exit(0);
+}
+if (!defined $ARGV[0]) {
+  HELP_MESSAGE();
+  exit(1);
+}
+
+my $mimeType = getMimeType($ARGV[0]) or die(qq(Could not determine type of file "$ARGV[0]"));
+my $chunker = getMimeChunker($ARGV[0]) or die(qq(Could not open file "$ARGV[0]"));
+printFile($mimeType, $chunker);
