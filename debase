@@ -54,13 +54,21 @@ sub printFile {
   my $mimeType = shift;
   my $chunker = shift;
   print qq(<!DOCTYPE html>\n);
+  print qq(<html>\n);
+  print qq(<body>\n);
+  print qq(<p>Encoded Data Follows. To automatically decode, please enable JavaScript.<br />\n);
+  print qq(MIME type: $mimeType</p>\n);
+  print qq(<pre id="encoded_data">\n);
+  while (my $chunk = $chunker->()) {
+    print qq($chunk\n);
+  }
+  print qq(</pre>\n);
   print qq(<script type="text/javascript">\n);
   print qq(location.href="data:$mimeType;base64,"+\n);
-  while (my $chunk = $chunker->()) {
-    print qq("$chunk"+\n);
-  }
-  print qq("";\n);
+  print qq(document.getElementById("encoded_data").innerHTML;\n);
   print qq(</script>\n);
+  print qq(</body>\n);
+  print qq(</html>\n);
 }
 
 my %opts;
