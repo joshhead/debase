@@ -4,7 +4,7 @@ use strict;
 use MIME::Base64 qw(encode_base64);
 use Getopt::Std;
 $Getopt::Std::STANDARD_HELP_VERSION = "true";
-$main::VERSION = "0.1";
+$main::VERSION = "0.2";
 
 sub HELP_MESSAGE {
   my $fh = shift || \*STDERR;
